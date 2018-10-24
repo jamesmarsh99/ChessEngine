@@ -10,6 +10,7 @@ public class Board {
     final int WHITE = 1;
     final int BLACK = -1;
     int turn;
+    boolean playComp;
     Pawn enPassant1W;
     Pawn enPassant2W;
     Pawn enPassant1B;
@@ -31,10 +32,10 @@ public class Board {
 
     public Board() {
         gameOver = false;
-        enPassant1B = new Pawn(0, null);
-        enPassant2B = new Pawn(0, null);
-        enPassant1W = new Pawn(1, null);
-        enPassant2W = new Pawn(1, null);
+        enPassant1B = null;
+        enPassant2B = null;
+        enPassant1W = null;
+        enPassant2W = null;
         turn = 1; //white's turn to move
         Piece[] backRow = {new Rook(BLACK, "a8"), new Knight(BLACK, "b8"), new Bishop(BLACK, "c8"), new Queen(BLACK, "d8"),
                 new King(BLACK, "e8"), new Bishop(BLACK, "f8"), new Knight(BLACK, "g8"), new Rook(BLACK, "h8")};
@@ -191,12 +192,19 @@ public class Board {
         return 7 - (coordinates.charAt(1) - 49);
     }
 
+    public void removePiece(Piece p) {
+        if (turn == WHITE) {
+            blackPieces.remove(p);
+        } else {
+            whitePieces.remove(p);
+        }
+    }
     public static void removeBlackPiece(int number, int letter) {
-        blackPieces.remove(indicesToCoordinates(number, letter));
+        blackPieces.remove(coordinatesToPiece(indicesToCoordinates(number, letter)));
     }
 
     public static void removeWhitePiece(int number, int letter) {
-        whitePieces.remove(indicesToCoordinates(number, letter));
+        whitePieces.remove(coordinatesToPiece(indicesToCoordinates(number, letter)));
     }
 
     public boolean movePiece(String coordinates1, String coordinates2) {
@@ -207,13 +215,13 @@ public class Board {
         Piece one = coordinatesToPiece(coordinates1);
         Piece two = coordinatesToPiece(coordinates2);
         if (one == null) {
-            System.out.println("There is no piece to move at " + coordinates1);
+            System.out.println("There is no piece to move at " + coordinates1 + "!");
             return false;
         } else if (one.color() != turn) {
             System.out.println("It is not your turn to move.");
             return false;
         } else if (two != null && one.color() == two.color()) {
-            System.out.println("You cannot capture your own piece at " + coordinates2);
+            System.out.println("You cannot capture your own piece at " + coordinates2 + "!");
             return false;
         } else {
             if (one.validMove(coordinates1, coordinates2)) {
@@ -232,7 +240,9 @@ public class Board {
                         //move pieces back to original position
                         board[number(coordinates2)][letter(coordinates2)] = two;
                         board[number(coordinates1)][letter(coordinates1)] = one;
-                        System.out.println("That move puts yourself in check!");
+                        if (!playComp) {
+                            System.out.println("That move puts yourself in check!");
+                        }
                         whiteInCheck = false;
                         one.changeCoordinates(coordinates1);
                         return false;
@@ -248,7 +258,9 @@ public class Board {
                     if (blackInCheck) {
                         board[number(coordinates2)][letter(coordinates2)] = two;
                         board[number(coordinates1)][letter(coordinates1)] = one;
-                        System.out.println("That move puts yourself in check!");
+                        if (!playComp) {
+                            System.out.println("That move puts yourself in check!");
+                        }
                         blackInCheck = false;
                         one.changeCoordinates(coordinates1);
                         return false;
@@ -286,14 +298,11 @@ public class Board {
                     ((Rook) one).hasMoved();
                 }
                 if (two != null) {
-                    if (turn == WHITE) {
-                        blackPieces.remove(two);
-                    } else {
-                        whitePieces.remove(two);
-                    }
+                    removePiece(two);
                 }
                 one.changeCoordinates(coordinates2);
                 checkAndSetEnPassant(one, two, coordinates1, coordinates2);
+                //queening
                 if (one instanceof Pawn) {
                     if (((Pawn) one).color == WHITE) {
                         if (number(((Pawn) one).coordinates) == 0) {
@@ -313,7 +322,9 @@ public class Board {
                         }
                     }
                 }
-                checkCheckmateStalemate(one);
+                if (!playComp) {
+                    checkCheckmateStalemate();
+                }
                 turn *= -1;
                 setEnPassantFalses();
                 return true;
@@ -325,7 +336,7 @@ public class Board {
         }
     }
 
-    public void checkCheckmateStalemate(Piece one) {
+    public void checkCheckmateStalemate() {
         //if a piece queens, I have to change the board
         if (turn == WHITE) {
             boolean blackIsSafe = false;
@@ -335,8 +346,27 @@ public class Board {
                 String coordinates22 = blackMove.substring(2, 4);
                 Piece one1 = coordinatesToPiece(coordinates11);
                 Piece two2 = coordinatesToPiece(coordinates22);
-                board[number(coordinates22)][letter(coordinates22)] = one1;
-                board[number(coordinates11)][letter(coordinates11)] = null;
+                int number1 = number(coordinates11);
+                int letter1 = letter(coordinates11);
+                int number2 = number(coordinates22);
+                int letter2 = letter(coordinates22);
+                Piece three = null;
+                int number3 = -1;
+                int letter3 = -1;
+                boolean enPassant = false;
+                if (one1 instanceof Pawn && ((Pawn) one1).checkEnPassant()) {
+                    int direction = ((Pawn) one1).getDirection();
+                    if (letter2 == letter1 + direction) {
+                        number3 = number1;
+                        letter3 = letter1 + direction;
+                        three = board[number3][letter3];
+                        board[number3][letter3] = null; // clearing off the piece taken by en passant
+                        blackPieces.remove(three);
+                        enPassant = true;
+                    }
+                }
+                board[number2][letter2] = one1;
+                board[number1][letter1] = null;
                 one1.changeCoordinates(coordinates22);
                 if (two2 != null && two2.color() == 1) {
                     whitePieces.remove(two2);
@@ -350,6 +380,10 @@ public class Board {
                 }
                 board[number(coordinates22)][letter(coordinates22)] = two2;
                 board[number(coordinates11)][letter(coordinates11)] = one1;
+                if (enPassant) {
+                    board[number3][letter3] = three;
+                    blackPieces.add(three);
+                }
                 one1.changeCoordinates(coordinates11);
             }
             if (!blackIsSafe) {
@@ -370,6 +404,25 @@ public class Board {
                 String coordinates22 = whiteMove.substring(2, 4);
                 Piece one1 = coordinatesToPiece(coordinates11);
                 Piece two2 = coordinatesToPiece(coordinates22);
+                int number1 = number(coordinates11);
+                int letter1 = letter(coordinates11);
+                int number2 = number(coordinates22);
+                int letter2 = letter(coordinates22);
+                Piece three = null;
+                int number3 = -1;
+                int letter3 = -1;
+                boolean enPassant = false;
+                if (one1 instanceof Pawn && ((Pawn) one1).checkEnPassant()) {
+                    int direction = ((Pawn) one1).getDirection();
+                    if (letter2 == letter1 + direction) {
+                        number3 = number1;
+                        letter3 = letter1 + direction;
+                        three = board[number3][letter3];
+                        board[number3][letter3] = null; // clearing off the piece taken by en passant
+                        whitePieces.remove(three);
+                        enPassant = true;
+                    }
+                }
                 board[number(coordinates22)][letter(coordinates22)] = one1;
                 board[number(coordinates11)][letter(coordinates11)] = null;
                 one1.changeCoordinates(coordinates22);
@@ -385,6 +438,10 @@ public class Board {
                 }
                 board[number(coordinates22)][letter(coordinates22)] = two2;
                 board[number(coordinates11)][letter(coordinates11)] = one1;
+                if (enPassant) {
+                    board[number3][letter3] = three;
+                    whitePieces.add(three);
+                }
                 one1.changeCoordinates(coordinates11);
             }
             if (!whiteIsSafe) {
@@ -400,36 +457,56 @@ public class Board {
     }
 
     public void setEnPassantFalses() {
-        enPassant1W.setEnPassantFalse();
-        enPassant2W.setEnPassantFalse();
-        enPassant1B.setEnPassantFalse();
-        enPassant2B.setEnPassantFalse();
+        if (enPassant1W != null) {
+            enPassant1W.setEnPassantFalse();
+            if (enPassant1W.checkEnPassant()) {
+                enPassant1W = null;
+            }
+        }
+        if (enPassant2W != null) {
+            enPassant2W.setEnPassantFalse();
+            if (enPassant2W.checkEnPassant()) {
+                enPassant2W = null;
+            }
+        }
+        if (enPassant1B != null) {
+            enPassant1B.setEnPassantFalse();
+            if (enPassant1B.checkEnPassant()) {
+                enPassant1B = null;
+            }
+        }
+        if (enPassant2B != null) {
+            enPassant2B.setEnPassantFalse();
+            if (enPassant2B.checkEnPassant()) {
+                enPassant2B = null;
+            }
+        }
     }
 
     public void checkAndSetEnPassant(Piece one, Piece two, String coordinates1, String coordinates2) {
         if (one instanceof Pawn) {
             if (((Pawn) one).color == BLACK) {
                 if (number(coordinates2) == 3 && number(coordinates1) == 1) {
-                    if (board[3][Math.min(7, letter(coordinates2) + 1)] instanceof Pawn) {
-                        Pawn a = (Pawn) board[3][Math.min(7, letter(coordinates2) + 1)];
+                    if (letter(coordinates2) < 7 && board[3][letter(coordinates2) + 1] instanceof Pawn) {
+                        Pawn a = (Pawn) board[3][letter(coordinates2) + 1];
                         a.setEnPassant(-1);
                         enPassant1B = a;
                     }
-                    if (board[3][Math.max(0, letter(coordinates2) - 1)] instanceof Pawn) {
-                        Pawn b = (Pawn) board[3][Math.max(0, letter(coordinates2) - 1)];
+                    if (letter(coordinates2) > 0 && board[3][letter(coordinates2) - 1] instanceof Pawn) {
+                        Pawn b = (Pawn) board[3][letter(coordinates2) - 1];
                         b.setEnPassant(1);
                         enPassant2B = b;
                     }
                 }
             } else {
                 if (number(coordinates2) == 4 && number(coordinates1) == 6) {
-                    if (board[4][Math.min(7, letter(coordinates2) + 1)] instanceof Pawn) {
-                        Pawn a = (Pawn) board[4][Math.min(7, letter(coordinates2) + 1)];
+                    if (letter(coordinates2) < 7 && board[4][letter(coordinates2) + 1] instanceof Pawn) {
+                        Pawn a = (Pawn) board[4][letter(coordinates2) + 1];
                         a.setEnPassant(-1);
                         enPassant1W = a;
                     }
-                    if (board[4][Math.max(0, letter(coordinates2) - 1)] instanceof Pawn) {
-                        Pawn b = (Pawn) board[4][Math.max(0, letter(coordinates2) - 1)];
+                    if (letter(coordinates2) > 0 && board[4][letter(coordinates2) - 1] instanceof Pawn) {
+                        Pawn b = (Pawn) board[4][letter(coordinates2) - 1];
                         b.setEnPassant(1);
                         enPassant2W = b;
                     }
@@ -441,7 +518,6 @@ public class Board {
     public Piece[][] getBoard() {
         return board;
     }
-
 
     //White pieces are denoted by capital letters
     //black pieces are denoted by lower case letters
@@ -507,6 +583,7 @@ public class Board {
             }
             System.out.println();
         }
+        System.out.println();
     }
 
     public void printPiece(Piece p) {
@@ -600,13 +677,17 @@ public class Board {
                 if (one != null && two != null && one.length() == 2 && two.length() == 2) {
                     movePiece(one, two);
                     printBoard();
+                    turn *= -1;
+                    checkCheckmateStalemate();
+                    turn *= -1;
                     one = null;
                     two = null;
                     //black will make a random move now
+                    playComp = true;
                     HashSet<String> blacksPossibleMoves = blackMoves();
                     String moveToPlay = null;
-                    if (turn == BLACK) {
-                        while (!gameOver && (moveToPlay == null || !movePiece(moveToPlay.substring(0, 2), moveToPlay.substring(2, 4)))) {
+                    if (turn == BLACK && !gameOver) {
+                        while (moveToPlay == null || !movePiece(moveToPlay.substring(0, 2), moveToPlay.substring(2, 4))) {
                             int size = blacksPossibleMoves.size();
                             int item = new Random().nextInt(size);
                             int i = 0;
@@ -617,68 +698,9 @@ public class Board {
                             }
                         }
                         printBoard();
-                    }
-                }
-            }
-        }
-    }
-
-    public void playComputerLevel2() {
-        String one = null;
-        String two = null;
-        while (true) {
-            if (StdDraw.hasNextKeyTyped()) {
-                char key = StdDraw.nextKeyTyped();
-                if (one == null || one.length() < 2) {
-                    if (one == null) {
-                        one = "";
-                    }
-                    one += key;
-                } else if (two == null || two.length() < 2) {
-                    if (two == null) {
-                        two = "";
-                    }
-                    two += key;
-                }
-                if (one != null && two != null && one.length() == 2 && two.length() == 2) {
-                    movePiece(one, two);
-                    printBoard();
-                    one = null;
-                    two = null;
-                    //black will make a random move now, but if he sees checkmate, he will play it.
-                    HashSet<String> blacksPossibleMoves = blackMoves();
-                    for (String move : blacksPossibleMoves) {
-                        String start = move.substring(0, 2);
-                        String end = move.substring(2, 4);
-                        Piece one = coordinatesToPiece(start);
-                        Piece two = coordinatesToPiece(end);
-                        //Prologue
-                        board[number(start)][letter(start)] = null;
-                        board[number(end)][letter(end)] = one;
-                        one.changeCoordinates(end);
-                        if (two != null && two.color == 1) {
-                            whitePieces.remove(two);
-                        }
-                        if (two != null && two.color == -1) {
-                            blackPieces.remove(two);
-                        }
-
+                        turn *= -1;
                         checkCheckmateStalemate();
-
-                    }
-                    String moveToPlay = null;
-                    if (turn == BLACK) {
-                        while (!gameOver && (moveToPlay == null || !movePiece(moveToPlay.substring(0, 2), moveToPlay.substring(2, 4)))) {
-                            int size = blacksPossibleMoves.size();
-                            int item = new Random().nextInt(size);
-                            int i = 0;
-                            for (String move : blacksPossibleMoves) {
-                                if (i == item)
-                                    moveToPlay = move;
-                                i++;
-                            }
-                        }
-                        printBoard();
+                        turn *= -1;
                     }
                 }
             }

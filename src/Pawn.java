@@ -7,7 +7,6 @@ public class Pawn implements Piece {
     int direction;
     int counter;
     String coordinates;
-
     public Piece[][] board;
 
     public Pawn(int color, String coordinates) {
@@ -79,10 +78,9 @@ public class Pawn implements Piece {
         if (color == 1) {
             //advancing 2 spaces
             if (enPassant) {
-                if (Board.number(coordinates2) == 2 &&
-                        Board.letter(coordinates2) == Board.letter(coordinates1) + direction) {
-                    board[Board.number(coordinates2) + 1][Board.letter(coordinates2)] = null;
-                    Board.removeBlackPiece(Board.number(coordinates2) + 1, Board.letter(coordinates2));
+                if (number2 == 2 && letter2 == letter1 + direction) {
+                    Board.removeBlackPiece(number2 + 1, letter2);
+                    board[number2 + 1][letter2] = null;
                     return true;
                 }
             }
@@ -97,10 +95,9 @@ public class Pawn implements Piece {
             return number1 - number2 == 1 && Board.coordinatesToPiece(coordinates2) == null;
         } else {
             if (enPassant) {
-                if (Board.number(coordinates2) == 5 &&
-                        Board.letter(coordinates2) == Board.letter(coordinates1) + direction) {
-                    board[Board.number(coordinates2) - 1][Board.letter(coordinates2)] = null;
-                    Board.removeWhitePiece(Board.number(coordinates2) - 1, Board.letter(coordinates2));
+                if (number2 == 5 && letter2 == letter1 + direction) {
+                    Board.removeWhitePiece(number2 - 1, letter2);
+                    board[number2 - 1][letter2] = null;
                     return true;
                 }
             }
@@ -121,10 +118,18 @@ public class Pawn implements Piece {
     }
 
     public void setEnPassantFalse() {
-        counter -= 1;
+        counter--;
         if (counter == -1) {
             enPassant = false;
         }
+    }
+
+    public boolean checkEnPassant() {
+        return enPassant;
+    }
+
+    public int getDirection() {
+        return direction;
     }
 
     @Override

@@ -5,33 +5,12 @@ public class BoardTester {
 
     public static void main(String[] args) {
         b = new Board();
-        //testCoordinatesToPiece();
-        //testPawnValidMoves();
-        //testKnightValidMoves();
-        //testEnPassant();
-        //testRookValidMoves();
-        //testBishopValidMoves();
-        //testKan();
-        //testIndicesToCoordinate();
-        //testPossibleMoves();
-        //testPuttingSelfInCheck();
-        //testBlackCheckmates();
-        //testWhiteCheckmates();
-        //debug1();
-        //debug2();
-        //debug3();
-        //checkQueening();
-        //play2v2();
-        //testWhiteShortCastling();
-        //testWhiteLongCastling();
-        //testStalemate();
-        playComputerLevel1();
-        //debug4();
-        //debug5();
-        //PiecesValueTester();
+        //play1v1();
+        //playComputerLevel1();
+        debug6();
     }
 
-    public static void play2v2() {
+    public static void play1v1() {
         b.printBoard();
         b.play2v2();
     }
@@ -57,7 +36,33 @@ public class BoardTester {
 
         System.out.println(b.whitePiecesValue());
         System.out.println(b.blackPiecesValue());
+    }
 
+    public static void debug7() {
+        move("e2", "e4");
+        move("g7", "g6");
+
+        move("d2", "d4");
+        move("d7", "d5");
+
+        move("e4", "e5");
+        move("f7", "f5");
+
+        move("e5", "f6");
+    }
+
+    public static void debug6() {
+        //FIXED
+        move("e2", "e4");
+        move("g7", "g6");
+
+        move("d2", "d4");
+        move("d7", "d5");
+
+        move("e4", "e5");
+        move("f7", "f5");
+
+        move("e5", "f6");
     }
 
     public static void debug5() {
