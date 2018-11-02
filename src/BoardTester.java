@@ -6,8 +6,50 @@ public class BoardTester {
     public static void main(String[] args) {
         b = new Board();
         //play1v1();
-        //playComputerLevel1();
-        debug6();
+        playComputerLevel1();
+        //debug7();
+    }
+
+    public static void debug7() {
+        //FIXED
+        move("e2", "e4");
+        move("d7", "d6");
+
+        move("d2", "d4");
+        move("c7", "c6");
+
+        move("c2", "c4");
+        move("h7", "h5");
+
+        move("b1", "c3");
+        move("c8", "g4");
+
+        move("f2", "f3");
+        move("h5", "h4");
+
+        move("f3", "g4");
+        move("g8", "h6");
+
+        move("g4", "g5");
+        move("e7", "e5");
+
+        move("g5", "h6");
+        move("h8", "h6");
+
+        move("c1", "h6");
+        move("b7", "b5");
+
+        move("c4", "b5");
+        move("b8", "d7");
+
+        move("b5", "c6");
+        move("f7", "f5");
+
+        move("c6", "d7");
+        move("d8", "d7");
+
+        move("h6", "g5");
+
     }
 
     public static void play1v1() {
@@ -37,22 +79,8 @@ public class BoardTester {
         System.out.println(b.whitePiecesValue());
         System.out.println(b.blackPiecesValue());
     }
-
-    public static void debug7() {
-        move("e2", "e4");
-        move("g7", "g6");
-
-        move("d2", "d4");
-        move("d7", "d5");
-
-        move("e4", "e5");
-        move("f7", "f5");
-
-        move("e5", "f6");
-    }
-
     public static void debug6() {
-        //FIXED
+
         move("e2", "e4");
         move("g7", "g6");
 

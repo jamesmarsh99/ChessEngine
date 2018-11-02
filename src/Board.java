@@ -15,6 +15,8 @@ public class Board {
     Pawn enPassant2W;
     Pawn enPassant1B;
     Pawn enPassant2B;
+    static boolean testingWhiteMoves;
+    static boolean testingBlackMoves;
     static Rook whiteShortCastle;
     static Rook blackShortCastle;
     static Rook whiteLongCastle;
@@ -36,6 +38,8 @@ public class Board {
         enPassant2B = null;
         enPassant1W = null;
         enPassant2W = null;
+        testingWhiteMoves = false;
+        testingBlackMoves = false;
         turn = 1; //white's turn to move
         Piece[] backRow = {new Rook(BLACK, "a8"), new Knight(BLACK, "b8"), new Bishop(BLACK, "c8"), new Queen(BLACK, "d8"),
                 new King(BLACK, "e8"), new Bishop(BLACK, "f8"), new Knight(BLACK, "g8"), new Rook(BLACK, "h8")};
@@ -99,6 +103,7 @@ public class Board {
     public static HashSet<String> blackMoves() {
         whiteInCheck = false;
         whiteCanBeInCheck = false;
+        testingBlackMoves = true;
         HashSet<String> blackmoves = new HashSet<>();
         for (Piece b : blackPieces) {
             HashMap<String, HashSet<String>> pieceMoves = b.moves();
@@ -111,12 +116,22 @@ public class Board {
                 }
             }
         }
+        testingBlackMoves = false;
         return blackmoves;
+    }
+
+    public static boolean testingWhiteMoves() {
+        return testingWhiteMoves;
+    }
+
+    public static boolean testingBlackMoves() {
+        return testingBlackMoves;
     }
 
     public static HashSet<String> whiteMoves() {
         blackInCheck = false;
         blackCanBeInCheck = false;
+        testingWhiteMoves = true;
         HashSet<String> whitemoves = new HashSet<>();
         for (Piece w : whitePieces) {
             HashMap<String, HashSet<String>> pieceMoves = w.moves();
@@ -129,6 +144,7 @@ public class Board {
                 }
             }
         }
+        testingWhiteMoves = false;
         return whitemoves;
     }
 
@@ -459,25 +475,25 @@ public class Board {
     public void setEnPassantFalses() {
         if (enPassant1W != null) {
             enPassant1W.setEnPassantFalse();
-            if (enPassant1W.checkEnPassant()) {
+            if (!enPassant1W.checkEnPassant()) {
                 enPassant1W = null;
             }
         }
         if (enPassant2W != null) {
             enPassant2W.setEnPassantFalse();
-            if (enPassant2W.checkEnPassant()) {
+            if (!enPassant2W.checkEnPassant()) {
                 enPassant2W = null;
             }
         }
         if (enPassant1B != null) {
             enPassant1B.setEnPassantFalse();
-            if (enPassant1B.checkEnPassant()) {
+            if (!enPassant1B.checkEnPassant()) {
                 enPassant1B = null;
             }
         }
         if (enPassant2B != null) {
             enPassant2B.setEnPassantFalse();
-            if (enPassant2B.checkEnPassant()) {
+            if (!enPassant2B.checkEnPassant()) {
                 enPassant2B = null;
             }
         }

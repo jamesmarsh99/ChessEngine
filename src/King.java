@@ -180,7 +180,7 @@ public class King implements Piece {
                         Board.blackMoves();
                         board[Board.number("e1")][Board.letter("e1")] = this;
                         board[Board.number("f1")][Board.letter("f1")] = null;
-                        changeCoordinates(coordinates);
+                        changeCoordinates("e1");
                         if (Board.whiteInCheck) {
                             Board.whiteInCheck = false;
                         } else {
@@ -201,7 +201,7 @@ public class King implements Piece {
                         Board.blackMoves();
                         board[Board.number("e1")][Board.letter("e1")] = this;
                         board[Board.number("d1")][Board.letter("d1")] = null;
-                        changeCoordinates(coordinates);
+                        changeCoordinates("e1");
                         if (Board.whiteInCheck) {
                             Board.whiteInCheck = false;
                         } else {
@@ -226,7 +226,7 @@ public class King implements Piece {
                         Board.whiteMoves();
                         board[Board.number("e8")][Board.letter("e8")] = this;
                         board[Board.number("f8")][Board.letter("f8")] = null;
-                        changeCoordinates(coordinates);
+                        changeCoordinates("e8");
                         if (Board.blackInCheck) {
                             Board.blackInCheck = false;
                         } else {
@@ -247,7 +247,7 @@ public class King implements Piece {
                         Board.whiteMoves();
                         board[Board.number("e8")][Board.letter("e8")] = this;
                         board[Board.number("d8")][Board.letter("d8")] = null;
-                        changeCoordinates(coordinates);
+                        changeCoordinates("e8");
                         if (Board.blackInCheck) {
                             Board.blackInCheck = false;
                         } else {

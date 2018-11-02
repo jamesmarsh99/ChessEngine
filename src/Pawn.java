@@ -79,8 +79,10 @@ public class Pawn implements Piece {
             //advancing 2 spaces
             if (enPassant) {
                 if (number2 == 2 && letter2 == letter1 + direction) {
-                    Board.removeBlackPiece(number2 + 1, letter2);
-                    board[number2 + 1][letter2] = null;
+                    if (!Board.testingWhiteMoves()) {
+                        Board.removeBlackPiece(number2 + 1, letter2);
+                        board[number2 + 1][letter2] = null;
+                    }
                     return true;
                 }
             }
@@ -96,8 +98,10 @@ public class Pawn implements Piece {
         } else {
             if (enPassant) {
                 if (number2 == 5 && letter2 == letter1 + direction) {
-                    Board.removeWhitePiece(number2 - 1, letter2);
-                    board[number2 - 1][letter2] = null;
+                    if (!Board.testingBlackMoves()) {
+                        Board.removeBlackPiece(number2 + 1, letter2);
+                        board[number2 + 1][letter2] = null;
+                    }
                     return true;
                 }
             }
